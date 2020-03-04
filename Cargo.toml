@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "bde-vote-front",
+    "bde-vote-back",
+]
