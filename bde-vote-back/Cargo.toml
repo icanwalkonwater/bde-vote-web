@@ -11,10 +11,18 @@ actix = "0.10.0-alpha.1"
 actix-web = "2.0.0"
 actix-rt = "1.0.0"
 actix-files = "0.2.1"
-serde = "1.0.104"
+
+log = "0.4.8"
+simple-error = "0.2.1"
+
+jsonwebtoken = "7.1.0"
+serde = { version = "1.0.104", feature = ["derive"] }
 env_logger = "0.7.1"
+
 lettre = "0.9.2"
 lettre_email = "0.9.2"
+
 dotenv = "0.15.0"
 dotenv_codegen = "0.15.0"
+
 mysql = "18.0.0"

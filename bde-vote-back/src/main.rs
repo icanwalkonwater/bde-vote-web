@@ -1,22 +1,14 @@
 #[macro_use]
 extern crate dotenv_codegen;
 
-use std::path::PathBuf;
-
-use actix::{Addr, SyncArbiter};
-use actix_files as fs;
-use actix_files::NamedFile;
-use actix_web::{get, HttpRequest, Result};
+use actix_files;
 use actix_web::middleware::Logger;
 use env_logger::Env;
-use mysql::{Conn, OptsBuilder};
 
-use bde_vote_back::{index, send_email, vote_for, WORKER_AMOUNT};
-use bde_vote_back::database::{create_sql_connection, DbExecutor};
-
-struct State {
-    db: Addr<DbExecutor>,
-}
+use actix_web::web;
+use bde_vote_back::database::DbExecutor;
+use bde_vote_back::{confirm_vote, index, test_db_vote, vote_for, State, WORKER_AMOUNT};
+use std::sync::Mutex;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -25,28 +17,26 @@ async fn main() -> std::io::Result<()> {
     dotenv::dotenv().unwrap();
     env_logger::from_env(Env::default().default_filter_or("info")).init();
 
-    let sys = actix::System::new("bde-vote-backend");
-
-    let addr = SyncArbiter::start(1, || DbExecutor {
-        conn: create_sql_connection().expect("Failed to connect to the database"),
+    let state = web::Data::new(State {
+        db: Mutex::new(DbExecutor::new_connection().unwrap()),
     });
 
     HttpServer::new(move || {
         App::new()
-            .data(State { db: addr.clone() })
+            .app_data(state.clone())
             .wrap(Logger::default())
-            .service(send_email)
+            .service(test_db_vote)
             .service(vote_for)
+            .service(confirm_vote)
             .service(index)
-            .service(fs::Files::new("/js", "./js").show_files_listing())
-            .service(fs::Files::new("/css", "./css").show_files_listing())
+            .service(actix_files::Files::new("/js", "./js").show_files_listing())
+            .service(actix_files::Files::new("/css", "./css").show_files_listing())
     })
-        .workers(WORKER_AMOUNT)
-        .bind(format!("{}:{}", dotenv!("HOST"), dotenv!("PORT")))?
-        .run()
-        .await?;
+    .workers(WORKER_AMOUNT)
+    .bind(format!("{}:{}", dotenv!("HOST"), dotenv!("PORT")))?
+    .run()
+    .await?;
 
     println!("Server started on {}:{}", dotenv!("HOST"), dotenv!("PORT"));
-    let _ = sys.run()?;
     Ok(())
 }

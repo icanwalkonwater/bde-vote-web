@@ -1,9 +1,13 @@
+use crate::voter::VoteOption;
 use lettre::smtp::authentication::{Credentials, Mechanism};
 use lettre::{ClientSecurity, SmtpClient, Transport};
 use lettre_email::Email;
-use std::error::Error;
 
-pub fn send_confirmation_mail(to: String, confirmation_link: String) -> Result<(), impl Error> {
+pub fn send_confirmation_mail(
+    to: String,
+    list: VoteOption,
+    confirmation_link: String,
+) -> simple_error::SimpleResult<()> {
     let email = Email::builder()
         .from(dotenv!("MAIL_FROM"))
         .to(format!("{}@iut2.univ-grenoble-alpes.fr", to))
@@ -11,11 +15,12 @@ pub fn send_confirmation_mail(to: String, confirmation_link: String) -> Result<(
         .html(format!(
             "
             Vous avez voter pour <b>{}</b><br>
+            <br>
             Veuillez cliquer sur ce lien pour confirmer votre vote: {}<br>
             Ce lien expirera dans 1h.<br>
             <br>
             Si vous n'avez pas voter, ignorez ce mail.",
-            to, confirmation_link
+            list, confirmation_link
         ))
         .build()
         .unwrap();
@@ -30,13 +35,15 @@ pub fn send_confirmation_mail(to: String, confirmation_link: String) -> Result<(
         .smtp_utf8(true)
         .transport();
 
-    let res = mailer.send(email.into())?;
+    let res = try_with!(mailer.send(email.into()), "Failed to send mail");
 
     if res.is_positive() {
         Ok(())
     } else {
-        Err(lettre::smtp::error::Error::Client(Box::leak(
-            res.code.to_string().into_boxed_str(),
-        )))
+        bail!(
+            "Failed with code {} and message: {}",
+            res.code,
+            res.message.join(", ")
+        )
     }
 }

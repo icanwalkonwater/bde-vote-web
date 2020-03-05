@@ -1,54 +1,47 @@
-use std::error::Error;
-
-use actix::{Actor, Message, SyncContext};
-use actix::prelude::*;
-use mysql::{Conn, OptsBuilder};
 use mysql::prelude::Queryable;
+use mysql::{Conn, OptsBuilder};
 
-use crate::voter::List;
+use crate::voter::VoteOption;
 
 pub struct DbExecutor {
     pub conn: Conn,
 }
 
-impl Actor for DbExecutor {
-    type Context = SyncContext<Self>;
+pub struct NewVote {
+    pub login: String,
+    pub vote: VoteOption,
 }
 
-pub struct PrepareVote {
-    vote: List,
-    login: String,
-    confirmation_token: String,
-}
+impl DbExecutor {
+    pub fn new_connection() -> simple_error::SimpleResult<Self> {
+        let opts = OptsBuilder::new()
+            .ip_or_hostname(Some(dotenv!("MYSQL_HOST")))
+            .tcp_port(dotenv!("MYSQL_PORT").parse::<u16>().unwrap())
+            .db_name(Some(dotenv!("MYSQL_DATABASE")))
+            .user(Some(dotenv!("MYSQL_USER")))
+            .pass(Some(dotenv!("MYSQL_PASSWORD")));
 
-impl Message for PrepareVote {
-    type Result = mysql::Result<()>;
-}
-
-impl Handler<PrepareVote> for DbExecutor {
-    type Result = mysql::Result<()>;
-
-    fn handle(&mut self, msg: PrepareVote, _: &mut Self::Context) -> Self::Result {
-        let statment = self.conn.prep("
-                INSERT INTO votes (login, vote, confirmation_token)
-                VALUES (:login, :vote, :confirmation_token);
-        ")?;
-
-        self.conn.exec_drop(statment, params! {
-            "login" => msg.login,
-            "vote" => format!("{:?}", msg.vote),
-            "confirmation_token" => msg.confirmation_token,
+        Ok(Self {
+            conn: try_with!(Conn::new(opts), "Failed to open DB connection"),
         })
     }
-}
 
-pub fn create_sql_connection() -> mysql::Result<Conn> {
-    let opts = OptsBuilder::new()
-        .ip_or_hostname(Some(dotenv!("MYSQL_HOST")))
-        .tcp_port(dotenv!("MYSQL_PORT").parse::<u16>().unwrap())
-        .db_name(Some(dotenv!("MYSQL_DATABASE")))
-        .user(Some(dotenv!("MYSQL_USER")))
-        .pass(Some(dotenv!("MYSQL_PASSWORD")));
+    pub fn vote(&mut self, vote: NewVote) -> simple_error::SimpleResult<()> {
+        let statement = try_with!(
+            self.conn
+                .prep("INSERT INTO votes (login, vote) VALUES (:login, :vote);"),
+            "Failed to prepare statement"
+        );
 
-    Conn::new(opts)
+        Ok(try_with!(
+            self.conn.exec_drop(
+                statement,
+                params! {
+                        "login" => vote.login,
+                        "vote" => format!("{:?}", vote.vote)
+                },
+            ),
+            "Failed to insert vote into DB"
+        ))
+    }
 }

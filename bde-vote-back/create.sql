@@ -1,9 +1,7 @@
 CREATE TABLE votes
 (
-    login              VARCHAR(8)  NOT NULL PRIMARY KEY,
-    vote               VARCHAR(10) NOT NULL,
-    confirmation_token VARCHAR(20) NOT NULL,
-    created_at         TIMESTAMP DEFAULT current_timestamp()
+    login VARCHAR(8)  NOT NULL PRIMARY KEY,
+    vote  VARCHAR(17) NOT NULL
 );
 
 DROP TABLE votes;
