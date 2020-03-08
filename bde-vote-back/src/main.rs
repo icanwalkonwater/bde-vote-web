@@ -15,6 +15,9 @@ async fn main() -> std::io::Result<()> {
     use actix_web::{App, HttpServer};
 
     dotenv::dotenv().unwrap();
+    #[cfg(debug_assertions)]
+    env_logger::from_env(Env::default().default_filter_or("trace")).init();
+    #[cfg(not(debug_assertions))]
     env_logger::from_env(Env::default().default_filter_or("info")).init();
 
     let state = web::Data::new(State {

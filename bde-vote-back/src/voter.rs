@@ -62,6 +62,8 @@ pub fn prepare_vote(payload: VotePayload) -> simple_error::SimpleResult<()> {
     )
     .unwrap();
 
+    debug!("Vote: built token: {}", token);
+
     Ok(try_with!(
         send_confirmation_mail(
             payload.login,

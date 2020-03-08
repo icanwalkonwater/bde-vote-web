@@ -1,0 +1,15 @@
+POST http://localhost:8000/vote
+Accept: application/json
+Content-Type: application/json
+
+{
+  "who": "FourthCompilation",
+  "login": "malandrl"
+}
+
+###
+
+GET http://localhost:8000/confirm_vote?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJtYWxhbmRybCIsInN1YiI6IkZvdXJ0aENvbXBpbGF0aW9uIiwiZXhwIjoxNTgzNjkyNDU1fQ.Ap9wjmTVM3M3TzemmHHMKjmHGo8bUU1QHONIWlYRFZYJ869A_haVNr63E9lQcIHNIfyVRHDW-HeQPotWtLY8Sg
+Accept: application/json
+
+###

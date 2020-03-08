@@ -75,6 +75,7 @@ pub async fn vote_for(payload: web::Json<VotePayload>) -> HttpResponse {
     let payload = payload.into_inner();
 
     if !check_login(&payload.login) {
+        info!("Vote: {} is not on the username whitelist !", &payload.login);
         return HttpResponse::Unauthorized().json(GenericResponse {
             code: 401,
             error: true,
