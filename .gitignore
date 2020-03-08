@@ -2,3 +2,4 @@
 /.idea
 .env
 logins.txt
+node_modules
