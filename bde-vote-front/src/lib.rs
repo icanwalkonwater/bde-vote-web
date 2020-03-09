@@ -1,9 +1,10 @@
 #![recursion_limit = "512"]
 
-use wasm_bindgen::prelude::*;
 use crate::app::App;
+use wasm_bindgen::prelude::*;
 
 mod app;
+mod vote_btn;
 
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]

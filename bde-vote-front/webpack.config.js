@@ -23,7 +23,8 @@ module.exports = (env, argv) => ({
                 use: [
                     'style-loader',
                     'css-loader',
-                    'sass-loader'
+                    'sass-loader',
+                    'postcss-loader',
                 ]
             }
         ]

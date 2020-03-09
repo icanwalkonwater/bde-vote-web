@@ -15,9 +15,9 @@ use actix_web::{get, post, web, HttpRequest, HttpResponse, Result};
 use serde::{Deserialize, Serialize};
 
 use crate::database::{DbExecutor, NewVote};
+use crate::student_checker::check_login;
 use crate::voter::{prepare_vote, VoteOption};
 use std::error::Error;
-use crate::student_checker::check_login;
 
 pub mod database;
 pub mod mailer;
@@ -75,12 +75,15 @@ pub async fn vote_for(payload: web::Json<VotePayload>) -> HttpResponse {
     let payload = payload.into_inner();
 
     if !check_login(&payload.login) {
-        info!("Vote: {} is not on the username whitelist !", &payload.login);
+        info!(
+            "Vote: {} is not on the username whitelist !",
+            &payload.login
+        );
         return HttpResponse::Unauthorized().json(GenericResponse {
             code: 401,
             error: true,
-            message: Some(String::from("Your username is not registered"))
-        })
+            message: Some(String::from("Your username is not registered")),
+        });
     }
 
     match prepare_vote(payload) {

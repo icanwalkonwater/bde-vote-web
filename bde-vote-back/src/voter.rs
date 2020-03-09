@@ -101,7 +101,10 @@ pub fn confirm_vote(db: &mut DbExecutor, token: String) -> simple_error::SimpleR
         ..
     } = res.unwrap(); // Now we can unwrap safely
 
-    let res = db.vote(NewVote { vote, login: login.clone() });
+    let res = db.vote(NewVote {
+        vote,
+        login: login.clone(),
+    });
     info!("{} voted for {:?}", login, vote);
 
     res

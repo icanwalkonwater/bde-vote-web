@@ -1,0 +1,24 @@
+.separator-container {
+  @apply flex w-full h-screen;
+
+  .side {
+    @apply h-full w-1/2 flex justify-center items-center transition-all duration-500;
+
+    &.left {
+      @apply bg-red-400;
+    }
+
+    &.right {
+      @apply bg-green-500;
+    }
+  }
+
+  &:hover {
+    & .side.left {
+      @apply w-4/5;
+    }
+    & .side.right {
+      @apply w-1/5;
+    }
+  }
+}

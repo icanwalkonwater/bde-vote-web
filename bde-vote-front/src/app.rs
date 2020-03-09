@@ -1,7 +1,8 @@
-use yew::prelude::*;
-use yew::{ComponentLink, Component};
 use yew::html::Scope;
+use yew::prelude::*;
 use yew::virtual_dom::VNode;
+use yew::{Component, ComponentLink};
+use crate::vote_btn::VoteBtn;
 
 pub struct App {
     link: ComponentLink<Self>,
@@ -21,7 +22,12 @@ impl Component for App {
 
     fn view(&self) -> VNode {
         html! {
-            <h1 class="test-class">{{ "Hello world !" }}</h1>
+            <div class="separator-container">
+                <div class="side left">
+                    <VoteBtn title="test"/>
+                </div>
+                <div class="side right"></div>
+            </div>
         }
     }
 }

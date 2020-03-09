@@ -1,5 +1,5 @@
-use lettre::{ClientSecurity, SmtpClient, Transport};
 use lettre::smtp::authentication::{Credentials, Mechanism};
+use lettre::{ClientSecurity, SmtpClient, Transport};
 use lettre_email::Email;
 
 use crate::voter::VoteOption;
@@ -28,17 +28,20 @@ pub fn send_confirmation_mail(
         .unwrap();
 
     let mut mailer = SmtpClient::new(
-        (dotenv!("MAIL_SENDGRID_SMTP"), dotenv!("MAIL_SENDGRID_SMTP_PORT").parse::<u16>().unwrap()),
+        (
+            dotenv!("MAIL_SENDGRID_SMTP"),
+            dotenv!("MAIL_SENDGRID_SMTP_PORT").parse::<u16>().unwrap(),
+        ),
         ClientSecurity::None,
     )
-        .unwrap()
-        .credentials(Credentials::new(
-            String::from(dotenv!("MAIL_SENDGRID_USER")),
-            String::from(dotenv!("MAIL_SENDGRID_API_KEY")),
-        ))
-        .authentication_mechanism(Mechanism::Login)
-        .smtp_utf8(true)
-        .transport();
+    .unwrap()
+    .credentials(Credentials::new(
+        String::from(dotenv!("MAIL_SENDGRID_USER")),
+        String::from(dotenv!("MAIL_SENDGRID_API_KEY")),
+    ))
+    .authentication_mechanism(Mechanism::Login)
+    .smtp_utf8(true)
+    .transport();
 
     let res = try_with!(mailer.send(email.into()), "Failed to send mail");
 
