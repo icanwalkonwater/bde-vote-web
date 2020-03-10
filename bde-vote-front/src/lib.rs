@@ -4,6 +4,7 @@ use crate::app::App;
 use wasm_bindgen::prelude::*;
 
 mod app;
+mod list_panel;
 mod vote_btn;
 
 #[cfg(feature = "wee_alloc")]

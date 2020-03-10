@@ -1,5 +1,10 @@
 .separator-container {
   @apply flex w-full h-screen;
+  @apply flex-col;
+
+  @screen md {
+    @apply flex-row;
+  }
 
   .side {
     @apply h-full w-1/2 flex justify-center items-center transition-all duration-500;
@@ -11,14 +16,107 @@
     &.right {
       @apply bg-green-500;
     }
-  }
 
-  &:hover {
-    & .side.left {
+    &.open {
       @apply w-4/5;
     }
-    & .side.right {
+
+    &.reduced {
       @apply w-1/5;
     }
   }
 }
+
+.inner-container {
+  @apply flex flex-col items-center;
+
+  * {
+    @apply transition-opacity duration-500;
+  }
+
+  .inner-title {
+    @apply text-4xl pb-5;
+  }
+
+  .vote-field {
+    @apply bg-white py-2 px-4 rounded-l-full outline-none;
+
+    &:focus, &:hover {
+      @apply bg-gray-200;
+    }
+
+    &:active {
+      @apply bg-gray-300;
+    }
+
+    &[disabled] {
+      @apply cursor-not-allowed;
+    }
+  }
+
+  .vote-btn {
+    @apply rounded-l-none border-l-2 border-gray-200;
+  }
+}
+
+.invisible-no-interaction {
+  @apply opacity-0 cursor-default;
+  pointer-events: none;
+}
+
+.btn {
+  @apply bg-white rounded-full py-2 px-4;
+
+  &:focus {
+    @apply outline-none;
+  }
+
+  &:hover {
+    @apply bg-gray-200;
+  }
+
+  &:active {
+    @apply bg-gray-300;
+  }
+
+  &[disabled] {
+    @apply cursor-not-allowed;
+  }
+}
+
+svg.loading-icon {
+  width: 1.5rem;
+  transform-origin: center;
+  animation: rotate 2s linear infinite;
+}
+
+.loading-icon > circle {
+  fill: none;
+  stroke: #fc2f70;
+  stroke-width: 3;
+  stroke-dasharray: 1, 200;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 200;
+    stroke-dashoffset: -35px;
+  }
+  100% {
+    stroke-dashoffset: -125px;
+  }
+}
+

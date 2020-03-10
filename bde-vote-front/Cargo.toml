@@ -8,8 +8,10 @@ edition = "2018"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-log = "0.4.8"
-wasm-bindgen = "0.2.59"
-web_logger = "0.2.0"
+log = "^0.4.8"
+wasm-bindgen = "^0.2.59"
+web_logger = "^0.2.0"
 yew = { version = "0.13.2", features = ["web_sys"] }
-wee_alloc = { version = "0.4.5", optional = true }
+wee_alloc = { version = "^0.4.5", optional = true }
+web-sys = { version = "0.3.36", features = ["KeyboardEvent", "HtmlInputElement"] }
+regex = "1.3.4"
