@@ -1,25 +1,34 @@
+use anyhow::Error;
+use serde::Serialize;
+use yew::format::Json;
 use yew::html::Scope;
 use yew::prelude::*;
+use yew::services::{DialogService, FetchService};
+use yew::services::fetch::{FetchTask, Request, Response};
 use yew::virtual_dom::VNode;
+use dotenv_codegen::dotenv;
 
 use crate::vote_btn::VoteBtn;
-use yew::services::ConsoleService;
 
 pub struct ListPanel {
     link: ComponentLink<Self>,
     props: Props,
+    vote_task: Option<FetchTask>,
 }
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct Props {
-    pub title: String,
+    pub logo_url: String,
+    pub vote: String,
     pub class: String,
     pub open: Option<bool>,
     pub onclick: Callback<MouseEvent>,
 }
 
 pub enum Msg {
-    SubmitVote(String, String),
+    SubmitVote(String),
+    SubmitOk,
+    SubmitFailed,
 }
 
 impl Component for ListPanel {
@@ -27,14 +36,50 @@ impl Component for ListPanel {
     type Properties = Props;
 
     fn create(props: Self::Properties, link: Scope<Self>) -> Self {
-        Self { link, props }
+        Self { link, props, vote_task: None }
     }
 
     fn update(&mut self, msg: Self::Message) -> bool {
         match msg {
-            Msg::SubmitVote(login, vote) => {
-                ConsoleService::new().log(&format!("{} - {}", login, vote));
+            Msg::SubmitVote(login) => {
+                let mut fetch = FetchService::new();
+
+                #[derive(Serialize)]
+                struct Payload {
+                    pub who: String,
+                    pub login: String,
+                }
+
+                let payload = Payload {
+                    who: self.props.vote.clone(),
+                    login,
+                };
+
+                let request = Request::post(dotenv!("VOTE_URL"))
+                    .header("Content-Type", "application/json")
+                    .body(Json(&payload))
+                    .unwrap();
+
+                self.vote_task = Some(fetch.fetch(
+                    request,
+                    self.link.callback(|res: Response<Result<String, Error>>| {
+                        if res.status().is_success() {
+                            Msg::SubmitOk
+                        } else {
+                            Msg::SubmitFailed
+                        }
+                    }),
+                ).unwrap());
+
                 true
+            }
+            Msg::SubmitOk => {
+                DialogService::new().alert("Un mail de confirmation vous a été envoyer sur votre mail universitaire ! Il expirera dans 12h");
+                false
+            }
+            Msg::SubmitFailed => {
+                DialogService::new().alert("Une erreur est survenue ! Contactez un membre du BDE et merci de donnez l'heure à laquelle elle est survenue.");
+                false
             }
         }
     }
@@ -54,8 +99,8 @@ impl Component for ListPanel {
         html! {
             <div class={ self.classes() } onclick=&self.props.onclick>
                 <div class="inner-container">
-                    <span class="inner-title">{ &self.props.title }</span>
-                    <VoteBtn visible={ self.props.open.unwrap_or(false) } onsubmit=self.link.callback(|l| Msg::SubmitVote(l, String::new()))/>
+                    <img class="logo" src={ self.props.logo_url.clone() } />
+                    <VoteBtn visible={ self.props.open.unwrap_or(false) } onsubmit=self.link.callback(|l| Msg::SubmitVote(l))/>
                 </div>
             </div>
         }

@@ -1,68 +1,53 @@
-use crate::list_panel::ListPanel;
-use yew::html::Scope;
-use yew::prelude::*;
-use yew::virtual_dom::VNode;
-use yew::{Component, ComponentLink};
+/// Attempt to use yew_router but it's not working
+
+use yew::{Component, ComponentLink, Html, html};
+use yew_router::router::Router;
+use yew_router::Switch;
+
+use crate::home::Home;
+use crate::confirmed_vote::ConfirmedVote;
+use yew_router::service::RouteService;
 
 pub struct App {
     link: ComponentLink<Self>,
-    side_open: SideOpen,
+    route_service: RouteService<AppRoute>,
 }
 
-#[derive(PartialEq, Eq)]
-pub enum SideOpen {
-    Left,
-    Right,
-    None,
-}
-
-pub enum Msg {
-    ClickLeft,
-    ClickRight,
+#[derive(Debug, Switch, Clone)]
+pub enum AppRoute {
+    #[to = "/"]
+    Home,
+    #[to = "/confirmed"]
+    ConfirmedVote,
 }
 
 impl Component for App {
-    type Message = Msg;
+    type Message = ();
     type Properties = ();
 
-    fn create(_: Self::Properties, link: Scope<Self>) -> Self {
-        Self {
+    fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
+        let route_service = RouteService::<AppRoute>::new();
+
+        App {
             link,
-            side_open: SideOpen::None,
+            route_service,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> bool {
-        match msg {
-            Msg::ClickLeft if self.side_open != SideOpen::Left => {
-                self.side_open = SideOpen::Left;
-                true
-            }
-            Msg::ClickRight if self.side_open != SideOpen::Right => {
-                self.side_open = SideOpen::Right;
-                true
-            }
-            _ => false,
-        }
+        false
     }
 
-    fn view(&self) -> VNode {
-        let left_open = if self.side_open == SideOpen::Left {
-            Some(true)
-        } else {
-            None
-        };
-        let right_open = if self.side_open == SideOpen::Right {
-            Some(true)
-        } else {
-            None
-        };
-
+    fn view(&self) -> Html {
         html! {
-            <div class="separator-container">
-                <ListPanel class="left" open={ left_open } title="αOS" onclick={ self.link.callback(|_| Msg::ClickLeft) }/>
-                <ListPanel class="right" open={ right_open } title="4ème Compilation" onclick={ self.link.callback(|_| Msg::ClickRight) }/>
-            </div>
+            <Router<AppRoute>
+                render = Router::render(|switch: AppRoute| {
+                    match switch {
+                        AppRoute::Home => html! { <Home/> },
+                        AppRoute::ConfirmedVote => html! { <ConfirmedVote/> },
+                    }
+                })
+            />
         }
     }
 }

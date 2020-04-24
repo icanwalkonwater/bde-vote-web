@@ -1,23 +1,23 @@
 #[macro_use]
 extern crate dotenv_codegen;
 #[macro_use]
-extern crate mysql;
-#[macro_use]
 extern crate log;
+#[macro_use]
+extern crate mysql;
 #[macro_use]
 extern crate simple_error;
 
+use std::error::Error;
 use std::path::PathBuf;
 use std::sync::Mutex;
 
 use actix_files::NamedFile;
-use actix_web::{get, post, web, HttpRequest, HttpResponse, Result};
+use actix_web::{get, http, HttpRequest, HttpResponse, post, Result, web};
 use serde::{Deserialize, Serialize};
 
-use crate::database::{DbExecutor, NewVote};
+use crate::database::DbExecutor;
 use crate::student_checker::check_login;
 use crate::voter::{prepare_vote, VoteOption};
-use std::error::Error;
 
 pub mod database;
 pub mod mailer;
@@ -40,28 +40,15 @@ pub struct GenericResponse {
     message: Option<String>,
 }
 
-#[get("/{filename:.*}")]
-pub async fn index(req: HttpRequest) -> Result<NamedFile> {
-    let path: PathBuf = req.match_info().query("filename").parse().unwrap();
-    Ok(NamedFile::open(path)?)
+#[get("/")]
+pub async fn index() -> Result<NamedFile> {
+    Ok(NamedFile::open("index.html".parse::<PathBuf>().unwrap())?)
 }
 
-#[get("/test_db")]
-pub async fn test_db_vote(data: web::Data<State>) -> HttpResponse {
-    let mut db = data.db.lock().unwrap();
-
-    let res = db.vote(NewVote {
-        vote: VoteOption::FourthCompilation,
-        login: String::from("malandrl"),
-    });
-
-    match res {
-        Ok(_) => HttpResponse::Ok().finish(),
-        Err(e) => {
-            eprintln!("{}", e);
-            HttpResponse::InternalServerError().finish()
-        }
-    }
+#[get("/{filename:.*}")]
+pub async fn file(req: HttpRequest) -> Result<NamedFile> {
+    let path: PathBuf = req.match_info().query("filename").parse().unwrap();
+    Ok(NamedFile::open(path)?)
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -114,11 +101,10 @@ pub async fn confirm_vote(
     let mut db = data.db.lock().unwrap();
 
     match voter::confirm_vote(&mut db, token) {
-        Ok(_) => HttpResponse::Ok().json(GenericResponse {
-            code: 200,
-            error: false,
-            message: Some(String::from("TODO: Show real page")),
-        }),
+        Ok(_) => HttpResponse::Found()
+            .header(http::header::LOCATION, "/confirmed.html")
+            .finish()
+            .into_body(),
         Err(e) => HttpResponse::Unauthorized().json(GenericResponse {
             code: 401,
             error: true,

@@ -7,14 +7,14 @@
   }
 
   .side {
-    @apply h-full w-1/2 flex justify-center items-center transition-all duration-500;
+    @apply h-full w-1/2 flex justify-center items-center bg-center bg-cover transition-all duration-500;
 
     &.left {
-      @apply bg-red-400;
+      background-image: url("/alphaos_cover.png");
     }
 
     &.right {
-      @apply bg-green-500;
+      background-image: url("/4th_cover.jpg");
     }
 
     &.open {
@@ -28,14 +28,15 @@
 }
 
 .inner-container {
-  @apply flex flex-col items-center;
+  @apply flex flex-col items-center mt-20;
 
   * {
     @apply transition-opacity duration-500;
   }
 
-  .inner-title {
-    @apply text-4xl pb-5;
+  .logo {
+    @apply pb-5;
+    width: 50%;
   }
 
   .vote-field {

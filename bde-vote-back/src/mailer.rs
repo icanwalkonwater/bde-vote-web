@@ -19,7 +19,7 @@ pub fn send_confirmation_mail(
             <br>
             Veuillez cliquer sur ce lien pour confirmer votre vote:<br>
             {}<br>
-            Ce lien expirera dans 1h.<br>
+            Ce lien expirera dans 12 heures.<br>
             <br>
             Si vous n'avez pas voter, ignorez ce mail.",
             list, confirmation_link

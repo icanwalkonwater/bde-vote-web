@@ -49,7 +49,7 @@ pub fn prepare_vote(payload: VotePayload) -> simple_error::SimpleResult<()> {
     let claims = ConfirmationToken {
         iss: payload.login.clone(),
         sub: payload.who,
-        exp: (SystemTime::now() + Duration::from_secs(60 * 60))
+        exp: (SystemTime::now() + Duration::from_secs(60 * 60 * 12)) // 12 hours
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_secs(),

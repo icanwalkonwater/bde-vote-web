@@ -12,6 +12,7 @@ actix = "0.10.0-alpha.1"
 actix-web = "2.0.0"
 actix-rt = "1.0.0"
 actix-files = "0.2.1"
+actix-cors = "0.2.0"
 
 log = "0.4.8"
 simple-error = "0.2.1"

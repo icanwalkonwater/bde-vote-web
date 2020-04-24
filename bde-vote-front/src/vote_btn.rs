@@ -1,10 +1,10 @@
 use regex::Regex;
-use web_sys::HtmlInputElement;
+use web_sys::{Event, HtmlInputElement};
+use yew::{Callback, Classes, Component, ComponentLink, html, NodeRef};
 use yew::html::Scope;
 use yew::macros::Properties;
-use yew::services::{ConsoleService, DialogService};
+use yew::services::DialogService;
 use yew::virtual_dom::VNode;
-use yew::{html, Callback, Classes, Component, ComponentLink, NodeRef};
 
 pub struct VoteBtn {
     link: ComponentLink<Self>,
@@ -16,7 +16,7 @@ pub struct VoteBtn {
 }
 
 pub enum Msg {
-    SubmitVote,
+    SubmitVote(Event),
 }
 
 #[derive(Properties, Clone)]
@@ -43,7 +43,8 @@ impl Component for VoteBtn {
 
     fn update(&mut self, msg: Self::Message) -> bool {
         match msg {
-            Msg::SubmitVote => {
+            Msg::SubmitVote(event) => {
+                event.prevent_default();
                 let el = self.input_node.cast::<HtmlInputElement>().unwrap();
                 let value: String = el.value();
 
@@ -77,7 +78,7 @@ impl Component for VoteBtn {
         }
 
         html! {
-            <form class=classes onsubmit=self.link.callback(|_| Msg::SubmitVote)>
+            <form class=classes onsubmit=self.link.callback(|e| { Msg::SubmitVote(e) })>
                 <input
                     ref=self.input_node.clone()
                     class="vote-field"
